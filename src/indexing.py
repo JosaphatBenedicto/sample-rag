@@ -1,4 +1,5 @@
 import bs4
+import os
 from langchainhub import Client
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader
@@ -7,6 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 
 import logging
 
@@ -19,7 +21,6 @@ class Indexer:
         self.docs = self.indexing()
         self.chunked = self.splitter()
         self.vectorstore = self.embedding()
-        self.retriever = self.vectorstore.as_retriever()
 
     def indexing(self) -> None:
         """
@@ -34,7 +35,7 @@ class Indexer:
                 )
             )
         )
-        self.docs = loader.load()
+        return loader.load()
     
     def splitter(self) -> None:
         """
@@ -45,12 +46,15 @@ class Indexer:
             chunk_size=1000,
             chunk_overlap=200
         )
-        self.chunked = text_splitter.split_documents(self.docs)
+        return text_splitter.split_documents(self.docs)
 
     def embedding(self) -> None:
         """
         Embed the split documents and store the vectorstore in self.vectorstore.
         Returns None.
         """
-        embeddings = OpenAIEmbeddings()
-        self.vectorstore = Chroma.from_documents(self.chunked, embeddings)
+
+        embeddings = GoogleGenerativeAIEmbeddings(
+            model="gemini-embedding-001"
+        )
+        return Chroma.from_documents(self.chunked, embeddings)
