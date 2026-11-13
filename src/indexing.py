@@ -16,7 +16,7 @@ class Indexer:
         self.chunked = self.splitter()
         self.vectorstore = self.embedding()
 
-    def indexing(self) -> None:
+    def indexing(self) -> list:
         """
         Index the documents from the web page and store them in self.docs.
         Returns the list of indexed documents.
@@ -31,7 +31,7 @@ class Indexer:
         )
         return loader.load()
     
-    def splitter(self) -> None:
+    def splitter(self) -> list:
         """
         Split the indexed documents into chunks and store them in self.chunked.
         Returns None.
@@ -42,10 +42,10 @@ class Indexer:
         )
         return text_splitter.split_documents(self.docs)
 
-    def embedding(self) -> None:
+    def embedding(self) -> Chroma:
         """
         Embed the split documents and store the vectorstore in self.vectorstore.
-        Returns None.
+        Returns the Chroma vectorstore.
         """
 
         embeddings = GoogleGenerativeAIEmbeddings(
